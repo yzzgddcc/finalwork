@@ -1,0 +1,10 @@
+<!-- 继承layout.html -->
+{% extends 'layout.html' %}
+
+<!-- 插入layout.html对应的位置上 -->
+{% block main %}
+<div class="jumbotron">
+    <h1>Hello, {{userInfo.username}}!</h1>
+    <p>欢迎进入我的博客后台管理！</p>
+</div>
+{% endblock %}

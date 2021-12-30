@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<!--
+* CoreUI - Free Bootstrap Admin Template
+* @version v2.0.0
+* @link https://coreui.io
+* Copyright (c) 2018 creativeLabs Łukasz Holeczek
+* Licensed under MIT (https://coreui.io/license)
+-->
+
+<html lang="en">
+
+<head>
+  <base href="./">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, shrink-to-fit=no">
+  <meta name="description" content="CoreUI - Open Source Bootstrap Admin Template">
+  <meta name="author" content="Łukasz Holeczek">
+  <meta name="keyword" content="Bootstrap,Admin,Template,Open,Source,jQuery,CSS,HTML,RWD,Dashboard">
+  <title>Login UI</title>
+  <!-- Icons-->
+  <link href="vendors/@coreui/icons/css/coreui-icons.min.css" rel="stylesheet">
+  <link href="vendors/flag-icon-css/css/flag-icon.min.css" rel="stylesheet">
+  <link href="vendors/font-awesome/css/font-awesome.min.css" rel="stylesheet">
+  <link href="vendors/simple-line-icons/css/simple-line-icons.css" rel="stylesheet">
+  <!-- Main styles for this application-->
+  <link href="css/style.css" rel="stylesheet">
+  <link href="vendors/pace-progress/css/pace.min.css" rel="stylesheet">
+</head>
+
+<body class="app flex-row align-items-center">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-8">
+        <div class="card-group">
+          <div class="card p-4">
+            <div class="card-body" id="itemsTemplate">
+              <h1>登录</h1>
+              <p class="text-muted">请输入账号和密码进行登录</p>
+              <form class="needs-validation" action="http://127.0.0.1:5500/work01.html">
+                <div class="input-group mb-3">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">
+                      <i class="icon-user"></i>
+                    </span>
+                  </div>
+                  <input class="form-control" type="text" placeholder="账号" required>
+                  <div class="invalid-feedback">
+                    <!-- 用户名必须2到16位中英文、首位必须是中英文，(字母，数字，下划线，减号) -->
+                    <!-- pattern="^([\u4e00-\u9fa5·A-Za-z][\u4e00-\u9fa5·A-Za-z0-9-_]{1,10})$" -->
+                  </div>
+                </div>
+                <div class="input-group mb-4">
+                  <div class="input-group-prepend">
+                    <span class="input-group-text">
+                      <i class="icon-lock"></i>
+                    </span>
+                  </div>
+                  <input class="form-control" type="password" placeholder="密码" required>
+                  <div class="invalid-feedback">
+                    <!-- 请输入正确的密码！ -->
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-6">
+                    <button class="btn btn-primary px-4" type="submit">登录</button>
+                  </div>
+                  <div class="col-6 text-right">
+                    <button class="btn btn-link px-0" type="button">忘记密码?</button>
+                  </div>
+                </div>
+              </form>
+            </div>
+          </div>
+          <div class="card text-white bg-primary py-5 d-md-down-none" style="width:44%">
+            <div class="card-body text-center">
+              <div>
+                <h2>注册</h2>
+                <p>如果你还没有注册账号，就请您点击现在注册进行账号注册.</p>
+                <button class="btn btn-primary active mt-3" type="button" data-toggle="tooltip" data-placement="bottom"
+                  title="点击注册！" onclick="jump()">
+                  现在注册!</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- CoreUI and necessary plugins-->
+  <script src="vendors/jquery/js/jquery.min.js"></script>
+  <script src="vendors/popper.js/js/popper.min.js"></script>
+  <script src="vendors/bootstrap/js/bootstrap.min.js"></script>
+  <script src="vendors/pace-progress/js/pace.min.js"></script>
+  <script src="vendors/perfect-scrollbar/js/perfect-scrollbar.min.js"></script>
+  <script src="vendors/@coreui/coreui/js/coreui.min.js"></script>
+  <script src="js/../axios.min.js"></script>
+  <script src="js/../vue.js"></script>
+  <script>
+    $(function () {
+        //使用vue.js框架，将response.data数据填充到itemsTemplate模板
+        var app = new Vue({
+            el: '#itemsTemplate',
+            data: {
+                items: '',
+                //添加临时数组对象
+                newItems: '',
+                //临时数组对象
+                editItems: {
+                    id: '', //id自动+1
+                    name: '',
+                    machine_learning: '',
+                    nodejs: '',
+                    microservice: '',
+                    rstudio: '',
+                    system_safety: '',
+                },
+                index: -1,
+                editIndex: -1,
+                delIndex: -1,
+                checkall: false, // 正在进行中的数据是否被选中
+                pageSize: 5, //一页加载数据
+                pageIndex: 0, //当前页面
+                total: '', //总数据
+
+            },
+            // 生命周期钩子函数(获取后端数据)
+            mounted: function () {
+                axios.get('http://localhost:8080/msg')
+                    .then((res) => {
+                        if (res.status == 200) {
+                            this.items = res.data;
+                            this.total = this.items.length;
+                            // this.checkall = this.items.every(items => items.stat);
+                            console.log("数据接收成功:\n", res.data);
+                        }
+                    });
+            },
+            // vue计算属性
+            computed: {
+
+                pageItems: function () {
+                    // `this` points to the vm instance
+                    var startIndex = this.pageIndex * this.pageSize; //当前页面起始index
+                    var endIndex = startIndex + this.pageSize - 1; //当前页面结束index
+
+                    return this.items.filter(function (value, index) {
+                        // 显示一个数组的过滤或排序副本，而不实际改变或重置原始数据
+                        return (
+                            index >= startIndex &&
+                            index <= endIndex
+                        );
+                    });
+                },
+                pageCount: function () {
+                    // 计算总页数
+                    var pageCount = Math.ceil(this.items.length / this.pageSize);
+                    return pageCount;
+
+                },
+            },
+            // 监听
+            watch: {
+                pageCount: function () {
+                    if (this.pageIndex == this.pageCount) {
+                        this.pageIndex = this.pageIndex - 1;
+                    }
+                    if (items.length <= this.pageSize) {
+                        this.pageIndex = 0;
+                    }
+                }
+            },
+            // 方法
+            methods: {
+                //上一页
+                PrePage: function () {
+                    if (this.pageIndex > 0) {
+                        this.pageIndex -= 1;
+                    }
+                },
+                // 下一页
+                NextPage: function () {
+                    if (this.pageIndex < this.pageCount - 1) {
+                        this.pageIndex += 1;
+                    }
+                },
+                // 添加
+                addBox: function () {
+                    var form = document.getElementsByClassName('validation')[
+                        0];
+                    form.classList.remove('was-validated');
+                    $('#addModal').modal('show');
+                    var idd; //id自增
+                    if (items.length == 0) {
+                        idd = 1;
+                    } else {
+                        idd = items[items.length - 1].id + 1;
+                    }
+                    var nums; //学号自增
+                    if (items.length == 0) {
+                        nums = 001;
+                    } else {
+                        nums = items[items.length - 1].num + 1;
+                    }
+                    this.newItems = {
+                        id: idd, //id自动+1
+                        num: nums,
+                        name: '',
+                        sex: '男',
+                        class: '软一',
+                        course: 'Web',
+                        status: '未到',
+                        registerDate: '2017-09-01',
+                    };
+                },
+                //添加保存
+                add: function () {
+                    var form = document.getElementsByClassName('validation')[
+                        0];
+                    if (form.checkValidity() === true) {
+                        //插入到items中
+                        var user = {
+                            id: app.newItems.id,
+                            name: app.newItems.name,
+                            sex: app.newItems.sex,
+                            registerDate: app.newItems.registerDate,
+                            status: app.newItems.status,
+                            course: app.newItems.course,
+                            class: app.newItems.class,
+                        };
+                        $.post("/users/create",
+                            user,
+                            function (data, status) {
+                                alert("数据: \n" + data + "\n状态: " + status);
+                            });
+                        this.items.push(this.newItems);
+                        // Vue.set(this.items, this.items.length, this.newItems);
+                        $('#addModal').modal('hide');
+                    };
+                    form.classList.add('was-validated');
+                },
+                // 单选删除
+                confirmDel: function (index) {
+                    $('#dangerModal').modal('show');
+                    // index = i;
+                    this.delIndex = this.pageIndex * 5 + index;
+                },
+                del: function () {
+                    // this.items.splice(this .delIndex, 1);
+                    $.get("/users/delete/" + this.items[this.delIndex].id,
+                        function (data, status) {
+                            var temp = data;
+                            if (temp) {
+                                // alert("数据: \n" + data + "\n状态: " + status);
+                            }
+                        });
+                    this.items.splice(this.delIndex, 1);
+                    $('#dangerModal').modal('hide');
+                    $('#successModal').modal('show');
+                },
+                //多项删除
+                multipleDel: function () {
+                    // var editItems;
+                    $('#multipleModal').modal('hide');
+                    var flag = 0;
+                    for (var i = 0; i < this.items.length; i++) {
+                        if (this.items[i].select === true) {
+                            $.get("/users/delete/" + this.items[i].id, function (
+                                data, status) {
+                                var temp = data;
+                                if (temp == true) {
+                                    // this.items.splice(i, 1);
+                                    // i--;
+                                    // flag = 1;
+                                    // alert("数据: \n" + data + "\n状态: " + status);
+                                }
+                            });
+                            this.items.splice(i, 1);
+                            i--;
+                            flag = 1;
+                            this.checkAll = false;
+                        }
+                    }
+                    if (flag === 1) {
+                        $('#successModal').modal('show');
+                        flag = 0;
+                    } else {
+                        $('#defeatedModal').modal('show');
+                    }
+                    this.pageIndex = 0;
+                },
+                //取消、关闭模态框
+                off: function () {
+                    $('#addModal').modal('hide');
+                    $('#primaryModal').modal('hide');
+                    $('#dangerModal').modal('hide');
+                    $('#multipleDel').modal('hide');
+                    $('#multipleModal').modal('hide');
+                    $('#successModal').modal('hide');
+                    $('#successModal1').modal('hide');
+                    $('#defeatedModal').modal('hide');
+                    $('#QJModal').modal('hide');
+                    $('#GRModal').modal('hide');
+                    $('#KQModal').modal('hide');
+                    $('#editsuccess').modal('hide');
+                    $('#courseModal').modal('hide');
+                },
+                //编辑
+                edit: function (index) {
+                    var form = document.getElementsByClassName('needs-validation')[
+                        0];
+                    form.classList.remove('was-validated');
+                    var newIndex = this.pageIndex * 5 + index;
+                    this.editIndex = newIndex;
+                    this.editItems = JSON.parse(JSON.stringify(app.items[
+                        newIndex]));
+                    $('#primaryModal').modal('show');
+                },
+                //编辑后保存
+                editSubmit: function () {
+                    var form = document.getElementsByClassName('needs-validation')[
+                        0];
+                    if (form.checkValidity() === true) {
+                        var formData = new FormData();
+
+                        formData.append("user", new Blob([JSON.stringify(this
+                            .editItems)], {
+                            type: "application/json"
+                        }));
+
+                        // var fileInput = document.getElementById("papers");
+                        // var files = fileInput.files;
+                        // for (var i = 0; i < files.length; i++) {
+                        //     var file = files[i];
+                        //     formData.append('files', file, file.name);
+                        // }
+
+                        $.ajax({
+                            url: "/users/edit",
+                            type: "POST",
+                            data: formData,
+                            async: true, //异步
+                            processData: false, //很重要，告诉jquery不要对form进行处理
+                            contentType: false, //很重要，指定为false才能形成正确的Content-Type
+                            success: function (data) {
+                                console.log(data);
+                            }
+                        });
+
+                        Vue.set(this.items, this.editIndex, this.editItems);
+                        $('#primaryModal').modal('hide');
+                    };
+                    form.classList.add('was-validated');
+                },
+                //考勤
+                eaditAll: function () {
+                    var flag = 0;
+                    for (var i = 0; i < items.length; i++) {
+                        if (items[i].select == true) {
+                            items[i].course = this.editItems.course;
+                            items[i].status = this.editItems.status;
+                            items[i].select = false;
+                            this.checkall = false;
+                            i--;
+                            flag = 1;
+                        }
+                    }
+                    if (flag == 1) {
+                        $('#KQModal').modal('hide');
+                        // $('#editsuccess').modal('show');
+                        flag = 0;
+                        this.pagesum = Math.ceil(this.items.length / this.pagesize);
+                        app.pageindex = 1;
+                    } else {
+                        $('#KQModal').modal('hide');
+                        $('#defeatedModal').modal('show');
+                    }
+
+                },
+                // 用户全选
+                checkAll() {
+                    // alert(1)
+                    for (var i = 0; i < this.items.length; i++) {
+                        this.items[i].select = this.checkall;
+                    }
+                },
+                //用户单选
+                checkOne() {
+                    this.checkall = this.items.every(items => items.select);
+                },
+
+            },
+        });
+        return;
+    });
+</script>
+  <script>
+    function jump(){
+        window.location.href="http://127.0.0.1:5500/register.html";
+    }
+</script>
+ 
+
+</body>
+
+</html>

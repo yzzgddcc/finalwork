@@ -1,0 +1,96 @@
+<!-- 继承父页面main/layout.html -->
+{%extends 'layout.html'%}
+<!-- 继承后插入父页面版的相对应地方 -->
+{%block content%}
+{%for content in contents%}
+<div class="listBox">
+    <h1>{{content.title}}</h1>
+    <p class="colDefault">
+        作者：<span class="colInfo">{{content.user.username}}</span> -
+        时间：<span class="colInfo">{{content.addTime|date('Y年m月d日 H:i:s', -8*60)}}</span> -
+        阅读：<span class="colInfo">{{content.views}}</span> -
+        评论：<span class="colInfo">{{content.comments.length}}</span>
+    </p>
+    <dfn>
+        <p>{{content.description}}</p>
+    </dfn>
+    <!-- <div class="box"> -->
+    <div class="function"><a href="/view?id={{content._id.toString()}}">阅读全文</a></div>
+    <div class="fun thumbs" value="{{content.id}}">点赞{{content.thumbs}}
+        <i class="glyphicon glyphicon-thumbs-up"></i>
+    </div>
+    <div class="fun forward" value="{{content.id}}">转发<i class="glyphicon glyphicon-share-alt"></i>
+    </div>
+</div>
+{%endfor%}
+
+<div class="pager">
+    <ul class="clear">
+        <li class="previous">
+            {%if page<=1%} <a href="javascript:;">没有上一页了</a>
+                {%else%}
+                <a href="/?category={{category}}&page={{page-1}}">上一页</a>
+                {%endif%}
+        </li>
+        <li>
+            {%if pages==0%}
+            <strong>没有数据了</strong>
+            {%else%}
+            <strong>{{page}}/{{pages}}</strong>
+            {%endif%}
+        </li>
+        <li class="next">
+            {%if page>=pages%}
+            <a href="javascript:;">没有下一页了</a>
+        </li>
+        {%else%}
+        <a href="/?category={{category}}&page={{page+1}}">下一页</a>
+        {%endif%}
+        </li>
+    </ul>
+</div>
+<!-- 博文点赞转发 -->
+<script>
+    //提交点赞
+    $('.thumbs').on('click', function () {
+        let id = $(this).attr("value")
+        console.log(id)
+        $.ajax({
+            type: 'get',
+            url: `/api/comment/thumbs/${id}`,
+            data: {},
+            success: function (res) {
+                console.log(res);
+                if (res.code == 0) {
+                    alert(res.message)
+                    window.location.reload();
+                } else {
+                    alert(res.message)
+                    window.location.reload();
+                }
+            }
+        })
+    });
+    //提交评论
+    $('.forward').on('click', function () {
+        let id = $(this).attr("value")
+        // console.log($(this).attr("value"))
+        console.log(id)
+        $.ajax({
+            type: 'get',
+            url: `/api/comment/forward/${id}`,
+            data: {},
+            success: function (res) {
+                console.log('响应数据:', res);
+                if (res.code == 0) {
+                    alert(res.message);
+                    window.location.reload();
+                } else {
+                    alert(res.message);
+                    window.location.reload();
+                }
+            }
+        })
+    });
+</script>
+{%endblock%}

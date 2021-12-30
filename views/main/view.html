@@ -1,0 +1,254 @@
+<!-- 继承父页面main/layout.html -->
+{%extends 'layout.html'%}
+<!-- 继承后插入父页面版的相对应地方 -->
+{%block content%}
+<div class="listBox">
+  <h1>{{content.title}}</h1>
+  <p class="colDefault">
+    作者：<span class="colInfo">{{content.user.username}}</span> - 时间：<span
+      class="colInfo"
+      >{{content.addTime|date('Y年m月d日 H:i:s', -8*60)}}</span
+    >
+    - 阅读：<span class="colInfo">{{content.views}}</span> - 评论：<span
+      class="colInfo"
+      >{{content.comments.length}}</span
+    >
+  </p>
+  <dfn> {{content.content}} </dfn>
+</div>
+
+<div class="listBox message" id="vueBox">
+  <h3 class="textLeft">
+    <strong>评论</strong>
+    <span class="em">一共有 <em id="messageCount">0</em> 条评论</span>
+  </h3>
+  <!-- 判断用户是否登录 -->
+  {% if userInfo._id %}
+  <p class="textLeft">{{userInfo.username}}</p>
+  <p class="textLeft">{{comments}}</p>
+  <p class="textLeft clear">
+    <!-- 评论内容 -->
+    <textarea id="messageContent" v-model="content"></textarea>
+    <input type="hidden" id="contentId" value="{{content.id}}" />
+    <button id="messageBtn" class="submit" @click="submit">提交</button>
+  </p>
+  {%else%}
+  <p class="bgDanger" style="line-height: 30px">你还没有登录，请先登录！</p>
+  {%endif%}
+  <!-- 评论信息 -->
+  <div class="messageList" v-if="total>0">
+    <div class="messageBox" v-for="(item, index) in pageItems" :key="index">
+      <p class="main clear">
+        <span class="userName" name="发表评论者"></span>
+        <span class="fr frTime" name="评论时间">time</span>
+      </p>
+      <span>评论内容:</span><span class="con"></span>
+      <span class="fr mouse" @click="reply(item)">回复</span>
+      <hr v-if="item.replyArr.length>0" />
+      <div class="replyBox" v-for="(val, k) in item.replyArr" :key="k">
+        <p class="rep clear">
+          <span class="replyName" name="回复评论者">111</span>
+          <span class="fr replyTime" name="回复时间">111</span>
+        </p>
+        <span class="replyCon" name="回复内容">111</span>
+      </div>
+    </div>
+  </div>
+  <div class="messageBox" v-else>
+    <p>还没有评论</p>
+  </div>
+  <el-dialog title="提示" :visible.sync="dialogVisible" width="30%">
+    <span>这是一段信息</span>
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="dialogVisible = false">取 消</el-button>
+      <el-button type="primary" @click="dialogVisible = false">确 定</el-button>
+    </span>
+  </el-dialog>
+  <!-- 回复评论对话框 -->
+  <el-dialog
+    title="回复评论"
+    :visible.sync="dialogVisible"
+    width="30%"
+    @close="addDialogClosed"
+  >
+    <!-- 内容主体区域 -->
+    <el-form
+      :model="addForm"
+      :rules="addFormRules"
+      ref="addFormRef"
+      label-width="100px"
+    >
+      <el-form-item label="回复内容:" prop="content">
+        <el-input v-model="addForm.content"></el-input>
+      </el-form-item>
+    </el-form>
+    <!-- 底部区域 -->
+    <span slot="footer" class="dialog-footer">
+      <el-button @click="dialogVisible = false">取 消</el-button>
+      <el-button type="primary" @click="replied">确 定</el-button>
+    </span>
+  </el-dialog>
+  <div class="pager">
+    <ul class="clear">
+      <li class="previous mouse">
+        <span v-if="this.page>1" @click="previous"> 上一页</span>
+        <span v-else style="cursor: not-allowed">没有上一页了</span>
+      </li>
+      <li></li>
+      <li class="next mouse">
+        <span v-if="this.page < this.pages" @click="next"> 下一页</span>
+        <span v-else style="cursor: not-allowed">没有下一页了</span>
+      </li>
+    </ul>
+  </div>
+</div>
+<!-- 获取数据 -->
+<script>
+  var app = []; //定义全局变量
+  $(function () {
+    app = new Vue({
+      el: "#vueBox",
+      data: {
+        prepage: 5, //一页加载数
+        page: 1, //当前页
+        items: [], //接收后端数据
+        total: 0, //总数据
+        content: "", //评论内容
+        dialogVisible: false, //对话框标识
+        addForm: {
+          contentId: "",
+          content: "",
+        },
+        // 添加表单的验证规则对象
+        addFormRules: {
+          content: [{ required: true, message: "请输入内容", trigger: "blur" }],
+        },
+      },
+      // 生命周期钩子函数(获取后端数据)
+      mounted() {
+        this.getCommentList();
+      },
+      computed: {
+        // 计算总页数
+        pages() {
+          let count = 0;
+          count = Math.max(Math.ceil(this.total / this.prepage), 1); //计算总页数
+          return count;
+        },
+        // vue计算属性:数据分页渲染
+        pageItems() {
+          let count = [];
+          let start = Math.max(0, (this.page - 1) * this.prepage); //一页起始index
+          let end = Math.min(start + this.prepage - 1, this.total); //一页结束index
+          count = this.items.filter(function (value, index) {
+            // 显示一个数组的过滤或排序副本，而不实际改变或重置原始数据
+            return index >= start && index <= end;
+          });
+          // 等待DOM生成后在渲染数据
+          setTimeout((_) => {
+            $(".messageBox").each(function (i, item) {
+              //   console.log("测试：", i, item, this.children);
+              //   console.log("测试：", $(this));
+              console.log("111:", $(item)[0].children);
+              //   console.log("测试con:", $(item).find(".con"));
+              $(item).find(".main")[0].children[0].innerText =
+                count[i].username;
+              $(item).find(".main")[0].children[1].innerText =
+                count[i].postTime;
+              $(item).children(".con").html(count[i].content);
+              //   console.log("测试con:", $(item).find(".con"));
+              //   $(".frTime").eq(i).html(count[i].postTime);
+              //   $(".con").eq(i).html(count[i].content);
+              console.log("525:", $(".messageBox").eq(i).find(".replyBox"));
+
+              //   console.log("测试1：", $(this).children(".con").html());
+
+              $(item)
+                .children(".replyBox")
+                .each((k, ele) => {
+                  console.log("k:", k, ele);
+                  $(ele).find(".rep")[0].children[0].innerText =
+                    count[i].replyArr[k].username;
+                  $(ele).find(".rep")[0].children[1].innerText =
+                    count[i].replyArr[k].postTime;
+                  $(ele)
+                    .children(".replyCon")
+                    .html(count[i].replyArr[k].content);
+                  console.log("556:", $(ele).children(".replyCon").html());
+                });
+            });
+          });
+          return count;
+        },
+      },
+      // 方法
+      methods: {
+        // 查询评论数据
+        async getCommentList() {
+          let contentId = $("#contentId").val();
+          let { data: res } = await axios.get(`/api/comment/${contentId}`);
+          console.log("测试:", res);
+          if (res.code != 0) return alert("系统繁忙");
+          this.items = res.data;
+          this.total = res.data.length;
+          $("#messageCount").html(this.total); //显示总数据
+        },
+        //上一页
+        previous() {
+          if (this.page > 1) {
+            this.page -= 1;
+          }
+        },
+        // 下一页
+        next() {
+          if (this.page < this.pages) this.page += 1;
+        },
+        // 发表评论
+        async submit() {
+          if (!this.content.trim())
+            return this.$message.info("评论内容不能为空");
+          let obj = {
+            contentId: $("#contentId").val(), //当前博文id
+            content: this.content, //评论内容
+          };
+          let { data: res } = await axios.post(`/api/comment/post`, obj); //向后端发起请求
+          console.log("测试:", res);
+          if (res.code != 0) return alert("系统繁忙");
+          this.content = "";
+          this.$message.success(res.message);
+          this.getCommentList();
+        },
+        // 监听模态框关闭重置表单
+        addDialogClosed() {
+          this.content = "";
+          this.$refs.addFormRef.resetFields();
+        },
+        // 回复评论
+        reply(val) {
+          this.addForm.comment = val; //回复对象
+          this.addForm.contentId = $("#contentId").val(); //当前博文id
+          this.dialogVisible = true;
+        },
+        // 提交回复评论
+        replied() {
+          this.$refs.addFormRef.validate(async (valid) => {
+            if (!valid) return;
+            const { data: res } = await axios.post(
+              `/api/comment/reply`,
+              this.addForm
+            );
+            if (res.code !== 0) {
+              this.dialogVisible = false;
+              return this.$message.error(res.message);
+            }
+            this.dialogVisible = false;
+            this.$message.success(res.message);
+            this.getCommentList();
+          });
+        },
+      },
+    });
+    return;
+  });
+</script>
+{%endblock%}

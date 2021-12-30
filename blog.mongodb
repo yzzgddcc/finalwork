@@ -1,0 +1,99 @@
+// MongoDB Playground
+// Use Ctrl+Space inside a snippet or a string literal to trigger completions.
+const database = '190110910401';
+//const collection = 'blog';
+
+// Create a new database.
+use('190110910401');
+
+// Create a new collection.
+//db.createCollection(collection);
+
+// The prototype form to create a collection:
+/* db.createCollection( <name>,
+  {http://localhost:8080
+    max: <number>,
+    storageEngine: <document>,
+    validator: <document>,
+    validationLevel: <string>,
+    validationAction: <string>,
+    indexOptionDefaults: <document>,
+    viewOn: <string>,
+    pipeline: <pipeline>,
+    collation: <document>,
+    writeConcern: <document>
+  }
+)*/
+/*
+ Navicat Premium Data Transfer
+
+ Source Server         : MongoDB
+ Source Server Type    : MongoDB
+ Source Server Version : 30404
+ Source Host           : localhost:27017
+ Source Schema         : blog
+
+ Target Server Type    : MongoDB
+ Target Server Version : 30404
+ File Encoding         : 65001
+
+ Date: 12/04/2021 17:28:48
+*/
+
+
+// ----------------------------
+// Collection structure for categories
+// ----------------------------
+db.getCollection("categories").drop();
+db.createCollection("categories");
+
+// ----------------------------
+// Documents of categories
+// ----------------------------
+db.getCollection("categories").insert([ {
+    _id: ObjectId("5ebd3af143bac116b0165758"),
+    name: "后端学习",
+    __v: NumberInt("0")
+} ]);
+db.getCollection("categories").insert([ {
+    _id: ObjectId("5ebd3afc43bac116b0165759"),
+    name: "数据库",
+    __v: NumberInt("0")
+} ]);
+db.getCollection("categories").insert([ {
+    _id: ObjectId("5ebd547d2815292a645bcbcf"),
+    name: "nodejs",
+    __v: NumberInt("0")
+} ]);
+db.getCollection("categories").insert([ {
+    _id: ObjectId("5ebd5ba64ec6dd2ac45494e5"),
+    name: "C语言",
+    __v: NumberInt("0")
+} ]);
+db.getCollection("categories").insert([ {
+    _id: ObjectId("5ebd8abe9a41c332645b40c2"),
+    name: "Python",
+    __v: NumberInt("0")
+} ]);
+db.getCollection("categories").insert([ {
+    _id: ObjectId("5ebd8ad39a41c332645b40c3"),
+    name: "Java",
+    __v: NumberInt("0")
+} ]);
+db.getCollection("categories").insert([ {
+    _id: ObjectId("5ecbbaced55dc71724005a65"),
+    name: "sdhj",
+    __v: NumberInt("0")
+} ]);
+
+// ----------------------------
+// Collection structure for contents
+// ----------------------------
+db.getCollection("contents").drop();
+db.createCollection("contents");
+
+// ----------------------------
+// Documents of contents
+// ----------------------------
+
+

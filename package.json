@@ -1,0 +1,25 @@
+{
+  "name": "blog",
+  "version": "1.0.0",
+  "description": "- 项目名称：博客平台 - 开发时间：2020.04~2020.06 - 开发环境：Node、MongoDB、Bootstrap、vscode 开发工具 - 项目描述：打造个人博客系统，娴熟学习前台的：   用户首页、分类页和详情页展示，后台的：注册用户管理、博 客分类管理、博客内容以及评论的管理功能。   该项目分为三大部分，分别是 JavaScript 基础部 分，提高部分以及实战部分，实战部分，数据库主要使用 MongDB。 - 我的职责：利用 node 实现个人全栈开发",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js"
+  },
+  "author": "zhif97",
+  "license": "ISC",
+  "dependencies": {
+    "body-parser": "^1.19.0",
+    "cookies": "^0.8.0",
+    "crypto": "^1.0.1",
+    "ejs": "^3.1.6",
+    "express": "^4.17.2",
+    "mongodb": "^4.2.2",
+    "mongoose": "^5.13.13",
+    "multer": "^1.4.2",
+    "nodemon": "^2.0.5",
+    "swig": "^1.4.2",
+    "uuid": "^8.3.2"
+  },
+  "devDependencies": {}
+}

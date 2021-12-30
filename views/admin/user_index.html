@@ -1,0 +1,46 @@
+<!-- 继承admin/layout.html -->
+{% extends 'layout.html' %}
+
+<!-- 插入admin/layout.html模板对应的位置上 -->
+{% block main %}
+
+<ol class="breadcrumb">
+    <li><a href="/admin">管理首页</a></li>
+    <li><span>用户列表</span></li>
+</ol>
+
+<h3>用户列表</h3>
+
+<table class="table table-hover table-striped">
+
+    <tr>
+        <th>ID</th>
+        <th>用户名</th>
+        <th>头像</th>
+        <th>是否是管理员</th>
+    </tr>
+
+    {% for user in users %}
+    <tr>
+        <td>{{user._id.toString()}}</td>
+        <td>{{user.username}}</td>
+        <td><img class="c-avatar-img" src="{{user.img}}" width="50px"></td>
+        <td>{{user.isAdmin}}</td>
+    </tr>
+    {% endfor %}
+
+</table>
+
+<nav>
+    <ul class="pager">
+        <li class="previous"><a href="/admin/user?page={{page-1}}">&larr; 上一页</a></li>
+
+        <li>
+            一共有 {{count}} 条数据，每页显示 {{limit}} 条数据，一共 {{pages}} 页，当前第 {{page}} 页
+        </li>
+
+        <li class="next"><a href="/admin/user?page={{page+1}}">下一页 &rarr;</a></li>
+    </ul>
+</nav>
+
+{% endblock %}
